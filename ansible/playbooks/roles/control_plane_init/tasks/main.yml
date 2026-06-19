@@ -1,0 +1,57 @@
+---
+- name: Initialize first control plane
+  command: >
+    kubeadm init
+    --apiserver-advertise-address={{ node_ip }}
+    --control-plane-endpoint={{ control_plane_endpoint }}
+    --upload-certs
+    --pod-network-cidr={{ pod_cidr }}
+  args:
+    creates: /etc/kubernetes/admin.conf
+
+- name: Set kubeconfig for vagrant user
+  shell: |
+    mkdir -p /home/vagrant/.kube
+    cp -f /etc/kubernetes/admin.conf /home/vagrant/.kube/config
+    chown -R vagrant:vagrant /home/vagrant/.kube
+
+- name: Create join command for workers
+  command: kubeadm token create --print-join-command
+  register: worker_join
+  changed_when: false
+
+- name: Create certificate key for additional control planes
+  command: kubeadm init phase upload-certs --upload-certs --kubeconfig /home/vagrant/.kube/config
+  register: cert_key
+  changed_when: false
+
+
+- name: Build base control-plane join command
+  set_fact:
+    control_plane_join_cmd_base: "{{ worker_join.stdout }} --control-plane --certificate-key {{ cert_key.stdout_lines[-1] }}"
+
+- name: Persist control-plane join command
+  copy:
+    dest: /vagrant/artifacts/join-control-plane.sh
+    mode: "0700"
+    content: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+
+      if [ "$#" -ne 1 ]; then
+        echo "Usage: $0 <apiserver-advertise-address>"
+        exit 1
+      fi
+
+      NODE_IP="$1"
+
+      {{ control_plane_join_cmd_base }} --apiserver-advertise-address "${NODE_IP}"
+
+- name: Persist worker join command
+  copy:
+    dest: /vagrant/artifacts/join-worker.sh
+    mode: "0700"
+    content: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+      {{ worker_join.stdout }}

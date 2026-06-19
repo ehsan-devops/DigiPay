@@ -1,0 +1,8 @@
+k8s_minor_version: "1.36"
+k8s_apt_version: "1.36.2-2.1"
+pod_cidr: "10.244.0.0/16"
+service_cidr: "10.96.0.0/12"
+control_plane_endpoint: "192.168.56.20:6443"
+control_plane_vip: "192.168.56.20"
+cilium_namespace: "kube-system"
+app_namespace: "hello"

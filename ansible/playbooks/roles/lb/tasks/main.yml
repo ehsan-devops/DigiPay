@@ -1,0 +1,42 @@
+---
+- name: Install HAProxy
+  apt:
+    name:
+      - haproxy
+    state: present
+    update_cache: true
+
+- name: Configure HAProxy for Kubernetes API
+  copy:
+    dest: /etc/haproxy/haproxy.cfg
+    content: |
+      global
+        log /dev/log local0
+        log /dev/log local1 notice
+        daemon
+        maxconn 2000
+
+      defaults
+        log global
+        mode tcp
+        option tcplog
+        timeout connect 10s
+        timeout client 1m
+        timeout server 1m
+
+      frontend kubernetes_api
+        bind *:6443
+        default_backend kubernetes_api_back
+
+      backend kubernetes_api_back
+        balance roundrobin
+        option tcp-check
+        server cp1 192.168.56.21:6443 check
+        server cp2 192.168.56.22:6443 check
+        server cp3 192.168.56.23:6443 check
+
+- name: Restart HAProxy
+  service:
+    name: haproxy
+    state: restarted
+    enabled: true

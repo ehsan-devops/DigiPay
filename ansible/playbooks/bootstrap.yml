@@ -1,0 +1,33 @@
+---
+# - name: Prepare all nodes
+#   hosts: k8s_cluster
+#   become: true
+#   roles:
+#     - common
+#     - containerd
+#     - kubernetes
+
+# - name: Configure load balancer
+#   hosts: loadbalancer
+#   become: true
+#   roles:
+#     - lb
+
+- name: Bootstrap first control plane
+  hosts: cp1
+  become: true
+  roles:
+    - control_plane_init
+    - cilium
+
+- name: Join additional control-plane nodes
+  hosts: control_plane[1:]
+  become: true
+  roles:
+    - control_plane_join
+
+- name: Join workers
+  hosts: workers
+  become: true
+  roles:
+    - worker_join

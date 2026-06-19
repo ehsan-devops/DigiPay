@@ -1,0 +1,28 @@
+---
+- name: Install Helm
+  shell: |
+    curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+  args:
+    creates: /usr/local/bin/helm
+
+- name: Add Cilium repo
+  command: helm repo add cilium https://helm.cilium.io
+  changed_when: false
+  failed_when: false
+
+- name: Update Helm repos
+  command: helm repo update
+  changed_when: false
+
+- name: Install Cilium with Hubble
+  command: >
+    helm upgrade --install cilium cilium/cilium
+    --namespace kube-system
+    --set hubble.relay.enabled=true
+    --set hubble.ui.enabled=true
+    --set operator.replicas=1
+    --set kubeProxyReplacement=false
+    --set ipam.mode=kubernetes
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  ignore_errors: true

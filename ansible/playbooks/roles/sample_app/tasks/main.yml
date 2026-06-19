@@ -1,0 +1,14 @@
+---
+- name: Create application namespace
+  command: kubectl create namespace hello
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  changed_when: false
+  failed_when: false
+
+- name: Deploy sample app Helm chart
+  command: >
+    helm upgrade --install hello-world /vagrant/helm/hello-world
+    --namespace hello
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf

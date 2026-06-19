@@ -1,0 +1,14 @@
+---
+- name: Install metrics and monitoring stack
+  hosts: cp1
+  become: true
+  roles:
+    - metrics_server
+    - prometheus_stack
+
+- name: Deploy sample application
+  hosts: cp1
+  become: true
+  roles:
+    - sample_app
+    - hpa_custom_metrics

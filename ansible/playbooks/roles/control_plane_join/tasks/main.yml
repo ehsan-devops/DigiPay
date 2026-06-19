@@ -1,0 +1,11 @@
+---
+- name: Join additional control plane
+  command: bash /vagrant/artifacts/join-control-plane.sh {{ node_ip }}
+  args:
+    creates: /etc/kubernetes/admin.conf
+
+- name: Set kubeconfig for vagrant user
+  shell: |
+    mkdir -p /home/vagrant/.kube
+    cp -f /etc/kubernetes/admin.conf /home/vagrant/.kube/config
+    chown -R vagrant:vagrant /home/vagrant/.kube

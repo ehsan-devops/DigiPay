@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hello-world-code
+data:
+  app.py: |
+{{ .Files.Get "files/app.py" | indent 4 }}

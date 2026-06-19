@@ -1,0 +1,5 @@
+---
+- name: Join worker node
+  command: bash /vagrant/artifacts/join-worker.sh
+  args:
+    creates: /etc/kubernetes/kubelet.conf

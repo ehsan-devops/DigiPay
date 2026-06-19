@@ -1,0 +1,18 @@
+---
+- name: Apply custom-metrics ServiceMonitor
+  command: kubectl apply -f /vagrant/k8s/sample-app/servicemonitor.yaml
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  changed_when: true
+
+- name: Apply CPU HPA fallback
+  command: kubectl apply -f /vagrant/k8s/sample-app/hpa-cpu.yaml
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  changed_when: true
+
+- name: Apply custom metrics HPA
+  command: kubectl apply -f /vagrant/k8s/sample-app/hpa-custom-metrics.yaml
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  changed_when: true
